@@ -1,0 +1,16 @@
+# 本地设计问答与随机方向选择记录
+**/.impeccable/questions/
+
+# 浏览器检查的生成产物（保留检查脚本与验证说明）
+weeks/*/checks/*.png
+weeks/*/checks/sample-record.md
+
+# 本地学习导出及临时环境
+notes/
+experiments/
+node_modules/
+__pycache__/
+.DS_Store
+*.log
+.env
+.env.*
