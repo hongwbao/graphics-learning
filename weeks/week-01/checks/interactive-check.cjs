@@ -7,7 +7,7 @@ const path=require('node:path');
   try {
     const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];
     page.on('pageerror',error=>errors.push(error.message));
-    await page.goto(process.env.COURSE_URL||'http://127.0.0.1:8001/');await page.waitForFunction(()=>GraphicsLab.available&&GraphicsPipeline);
+    await page.goto(process.env.COURSE_URL||'http://127.0.0.1:8003/week-01/');await page.waitForFunction(()=>GraphicsLab.available&&GraphicsPipeline);
     const image=()=>page.evaluate(()=>GraphicsLab.capture());
     const original=await image(),defaultFragment=await page.inputValue('#shader-code');
     await page.fill('#shader-code',defaultFragment.replace('ambient = 0.22','ambient = 0.60'));

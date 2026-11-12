@@ -17,3 +17,6 @@ web
 
 ## Confirmed Learning Preferences
 用户于 2026-11-12 反馈：已有编程基础，希望直接编辑少量核心代码来获得更高自由度；参数滑块作为辅助。知识讲解应结合图示和可观察的计算过程，尤其管线不能只有文字。此偏好适用于后续课程。
+
+## Course Site Structure
+用户确认将 `weeks/` 作为统一静态站点根目录，`weeks/index.html` 为课程首页，每周是独立子页面。保留完整 weeks 目录及公共导航资源；课程清单由 `weeks/courses.js` 统一维护，不为每周单独启动服务。

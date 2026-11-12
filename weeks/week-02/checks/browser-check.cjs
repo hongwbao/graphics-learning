@@ -1,6 +1,6 @@
 const {chromium}=require(process.env.PLAYWRIGHT_PATH||'playwright');
 const assert=require('node:assert/strict');const path=require('node:path');
-const url=process.env.COURSE_URL||'http://127.0.0.1:8003/';
+const url=process.env.COURSE_URL||'http://127.0.0.1:8003/week-02/';
 (async()=>{const browser=await chromium.launch({executablePath:process.env.CHROME_PATH||'/usr/bin/google-chrome',args:['--no-sandbox','--use-angle=swiftshader','--enable-unsafe-swiftshader']});try{
  const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(url);await page.waitForFunction(()=>GraphicsLab.available&&VectorDiagrams);assert.equal(await page.evaluate(()=>GraphicsLab.check()),0);
  const image=()=>page.evaluate(()=>GraphicsLab.capture());const baseline=await image();

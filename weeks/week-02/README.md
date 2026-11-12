@@ -4,16 +4,16 @@
 
 ## 启动
 
-推荐在项目根目录启动，让两周间导航可用：
+统一从 `weeks/` 启动整个课程，一次服务所有周次：
 
 ```bash
-cd /home/bhw/repos/graphics-learning
+cd /home/bhw/repos/graphics-learning/weeks
 python3 -m http.server 8003 --bind 127.0.0.1
 ```
 
-打开 **http://127.0.0.1:8003/weeks/week-02/**。按 Ctrl+C 停止。端口占用时换端口，并同步修改地址；浏览器记录按站点/端口隔离。
+课程首页：**http://127.0.0.1:8003/**。本周入口：**http://127.0.0.1:8003/week-02/**。页面顶部可返回首页或切换已制作周次。按 Ctrl+C 停止；端口占用时换端口并同步修改浏览器地址。
 
-只有 Python 3 标准库，无需 npm 或 Python 包。也可直接打开本目录 `index.html`；浏览器对 file:// 存储行为可能不同。课程与实验无需联网；参考链接需要联网。
+无需安装 npm 或 Python 包。请保留完整 `weeks/` 目录，以包含统一导航资源；也可直接打开 `weeks/index.html`，但浏览器对 file:// 的持久化行为存在差异，长期学习推荐固定 HTTP 地址。课程和实验可离线使用，外部参考链接需要联网。
 
 ## 学习顺序与提高的难度
 
@@ -63,13 +63,15 @@ Markdown 导出包含实验代码、姿态/结果与解释；PNG 单独下载。
 数学验证不需要安装依赖：
 
 ```bash
+cd /home/bhw/repos/graphics-learning
 node weeks/week-02/checks/math-check.cjs
 ```
 
 重新运行浏览器检查才需要 Playwright 与 Chrome/Chromium。可使用现有安装，不是课程运行依赖。在上述服务器运行时：
 
 ```bash
-COURSE_URL=http://127.0.0.1:8003/weeks/week-02/ \
+cd /home/bhw/repos/graphics-learning
+COURSE_URL=http://127.0.0.1:8003/week-02/ \
 PLAYWRIGHT_PATH=/已有的/node_modules/playwright \
 CHROME_PATH=/usr/bin/google-chrome \
 node weeks/week-02/checks/browser-check.cjs

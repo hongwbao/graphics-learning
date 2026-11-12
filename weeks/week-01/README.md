@@ -4,14 +4,16 @@
 
 ## 启动
 
+统一从 `weeks/` 启动整个课程，一次服务所有周次：
+
 ```bash
-cd /home/bhw/repos/graphics-learning/weeks/week-01
-python3 -m http.server 8001 --bind 127.0.0.1
+cd /home/bhw/repos/graphics-learning/weeks
+python3 -m http.server 8003 --bind 127.0.0.1
 ```
 
-浏览器打开 **http://127.0.0.1:8001/**。终端按 `Ctrl+C` 停止。使用 Python 标准库是为了提供可靠的本地静态 HTTP 服务，无需安装 Python 包。端口被占用时换为 8002 并同步修改浏览器地址；不同端口的浏览器学习记录互不共享。
+课程首页：**http://127.0.0.1:8003/**。本周入口：**http://127.0.0.1:8003/week-01/**。页面顶部可返回首页或切换已制作周次。按 Ctrl+C 停止；端口占用时换端口并同步修改浏览器地址。
 
-也可双击 `index.html` 直接阅读和使用实验；浏览器对 `file://` 的持久化行为存在差异，长期学习推荐固定 HTTP 地址。
+无需安装 npm 或 Python 包。请保留完整 `weeks/` 目录，以包含统一导航资源；也可直接打开 `weeks/index.html`，但浏览器对 file:// 的持久化行为存在差异，长期学习推荐固定 HTTP 地址。课程和实验可离线使用，外部参考链接需要联网。
 
 ## 学习顺序
 
@@ -93,12 +95,12 @@ python3 -m http.server 8001 --bind 127.0.0.1
 cd /home/bhw/repos/graphics-learning/weeks/week-01
 PLAYWRIGHT_PATH=/已有的/node_modules/playwright \
 CHROME_PATH=/usr/bin/google-chrome \
-node checks/browser-check.cjs
+COURSE_URL=http://127.0.0.1:8003/week-01/ node checks/browser-check.cjs
 ```
 
 也可以在临时目录 `npm install --prefix /tmp/graphics-week01-check playwright`，将 `PLAYWRIGHT_PATH` 指向其安装路径；这只为自动化测试提供浏览器控制，不属于课程依赖。检查使用新建的独立浏览器上下文，不会覆盖你日常浏览器中的学习记录。测试会将截图和示例记录写入 `checks/`。`COURSE_URL` 可覆盖默认地址。
 
-验证新增交互：使用相同环境变量运行 `node checks/interactive-check.cjs`。两套检查均需在独立的浏览器上下文中执行，不会影响实际学习记录。
+验证新增交互：使用相同环境变量运行 `COURSE_URL=http://127.0.0.1:8003/week-01/ node checks/interactive-check.cjs`。两套检查均需在独立的浏览器上下文中执行，不会影响实际学习记录。
 
 ## 资料
 
