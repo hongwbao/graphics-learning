@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-12T10:30:00Z",
+  "title": "Design System: 图形学手记",
+  "extensions": {
+    "shadows": [],
+    "motion": [{"name":"anchor-navigation","value":"scroll-behavior: smooth","purpose":"锚点导航；减少动态效果偏好下关闭。"}],
+    "breakpoints": [{"name":"tablet","value":"1100px"},{"name":"phone","value":"760px"},{"name":"wide","value":"1450px"}]
+  },
+  "components": [{"name":"主要按钮","kind":"button","refersTo":"button-primary","description":"开始学习、执行实验与导出记录。","html":"<button class=\"primary\">执行单变量实验</button>","css":".primary{font:14px/1.85 sans-serif;background:#225c49;color:#fff;border:1px solid transparent;border-radius:5px;padding:12px 20px;cursor:pointer}.primary:focus-visible{outline:3px solid #b46a25;outline-offset:4px}.primary:hover{filter:brightness(.93)}"}],
+  "narrative": {"northStar":"解释一张图如何形成","overview":"可读的中文课程，配合真实渲染与单变量实验。","keyCharacteristics":["米白正文","深绿目录","真实 WebGL 场景"],"rules":[{"name":"正文优先","body":"不用重复卡片包围每个段落。","section":"layout"}],"dos":["保留键盘焦点","为实验说明简化边界"],"donts":["把后续推导当作第一周前提","依赖外部字体或 CDN"]}
+}
