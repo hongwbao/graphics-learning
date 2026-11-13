@@ -8,7 +8,7 @@
 
 ```bash
 cd /home/bhw/repos/graphics-learning/weeks
-python3 -m http.server 8003 --bind 127.0.0.1
+python3 serve.py --port 8003 --bind 127.0.0.1
 ```
 
 课程首页：**http://127.0.0.1:8003/**。本周入口：**http://127.0.0.1:8003/week-01/**。页面顶部可返回首页或切换已制作周次。按 Ctrl+C 停止；端口占用时换端口并同步修改浏览器地址。

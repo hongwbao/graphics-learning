@@ -10,7 +10,7 @@
 
 ```bash
 cd /home/bhw/repos/graphics-learning/weeks
-python3 -m http.server 8003 --bind 127.0.0.1
+python3 serve.py --port 8003 --bind 127.0.0.1
 ```
 
 - 首页：**http://127.0.0.1:8003/**

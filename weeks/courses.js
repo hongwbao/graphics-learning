@@ -2,6 +2,7 @@
  * 不使用 fetch 或构建步骤，HTTP 与 file:// 都可运行。
  */
 'use strict';
+window.GraphicsCourseRevision='20261113-course16-r2';
 window.GraphicsCourses=Object.freeze([
   {week:1,phase:1,title:'从场景到屏幕',description:'用真实 WebGL 场景串起顶点、片段、光栅化与深度测试。',path:'week-01/index.html',level:'基础'},
   {week:2,phase:1,title:'向量与坐标系',description:'手算坐标、投影与叉积，修复空间混用，用反例验证。',path:'week-02/index.html',level:'进阶'},

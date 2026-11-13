@@ -10,7 +10,7 @@
 
 ```bash
 cd /home/bhw/repos/graphics-learning/weeks
-python3 -m http.server 8003 --bind 127.0.0.1
+python3 serve.py --port 8003 --bind 127.0.0.1
 ```
 
 首页 http://127.0.0.1:8003/ ，本周 http://127.0.0.1:8003/week-08/ 。无运行依赖或构建步骤，保留完整 weeks 目录及公共资源。外部资料链接需要联网。按 Ctrl+C 停止。

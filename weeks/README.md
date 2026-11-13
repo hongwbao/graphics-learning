@@ -6,7 +6,7 @@
 
 ```bash
 cd /home/bhw/repos/graphics-learning/weeks
-python3 -m http.server 8003 --bind 127.0.0.1
+python3 serve.py --port 8003 --bind 127.0.0.1
 ```
 
 打开 **http://127.0.0.1:8003/**，从首页进入课程：
@@ -82,3 +82,10 @@ weeks/
 
 
 实验记录附带当时的核心代码、脚手架/数学 helper，以及不超过30万字符的实际输入表达式，保留 Infinity、NaN 和 typed array 的 JavaScript 表示。更大输入不内嵌记录，界面会提醒另存完整核心程序；此时仅保存 Markdown 不足以严格重现全部输入。下载程序包含当前实际输入，需在改变参数前及时保留。
+
+
+## 避免旧目录缓存
+
+推荐使用 `python3 serve.py` 启动：它始终服务本目录，给静态资源加 `Cache-Control: no-store`，不因旧的 If-Modified-Since 返回过期内容。HTML 引用和跨周链接也带发布版本，防止浏览器把旧课程目录脚本与新页面混用。课程首页不会因旧版目录脚本而删除已经发布的课程。
+
+若浏览器此前已经缓存旧首页，可一次打开 `http://127.0.0.1:8003/?v=20261113-course16-r2#courses`，之后正常导航即可。URL版本参数不会改变同源localStorage学习记录。普通静态托管仍可使用，但更新课程资源后应更新HTML的资源版本。
