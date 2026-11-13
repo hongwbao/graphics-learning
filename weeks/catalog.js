@@ -9,5 +9,7 @@
     title.textContent=course.title;if(course.path){title.href=course.path;title.className='course-title';title.setAttribute('aria-label',`第 ${course.week} 周：${course.title}`);}description.textContent=course.description;body.append(title,description);
     status.className='course-availability';status.textContent=course.path?(course.level||'可学习'):'计划中';row.append(number,body,status);(course.path?list:planned).append(row);
   });
-  document.querySelector('#course-count').textContent=`目前已制作 ${courses.filter(c=>c.path).length} 周；其余内容将逐周加入。`;
+  const ready=courses.filter(c=>c.path).length,remaining=courses.length-ready;
+  document.querySelector('#course-count').textContent=remaining?`目前已制作 ${ready} 周；其余内容将逐周加入。`:`第 1–${ready} 周均已制作，可按顺序或按主题学习。`;
+  if(planned.closest('details'))planned.closest('details').hidden=remaining===0;
 })();

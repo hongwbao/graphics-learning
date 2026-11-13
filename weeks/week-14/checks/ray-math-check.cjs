@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const lesson={window:{}};vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../lesson.js'),'utf8'),lesson);
+const V=`const add=(a,b)=>a.map((v,i)=>v+b[i]),sub=(a,b)=>a.map((v,i)=>v-b[i]),scale=(a,s)=>a.map(v=>v*s),dot=(a,b)=>a.reduce((s,v,i)=>s+v*b[i],0),cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],unit=a=>{const n=Math.hypot(...a);return n?a.map(v=>v/n):null;};`;
+const api=new Function(V+lesson.window.Lesson.lab.prelude+';return {hitSphere,nearest,renderRay};')();
+const sphere={id:'near',p:[0,0,-3],r:1,c:[.2,.5,.3],m:.5};const h=api.hitSphere([0,0,0],[0,0,-1],sphere,.001,1e30);assert.equal(h.t,2);assert.deepEqual(h.p,[0,0,-2]);assert.equal(api.hitSphere([0,0,0],[0,0,-1],sphere,.001,1e30,true).t,4);
+assert.equal(api.hitSphere([0,0,-3],[0,0,-1],sphere,.001,1e30).t,1);assert.equal(api.hitSphere([1,0,0],[0,0,-1],sphere,.001,1e30).t,3);assert.equal(api.hitSphere([2,0,0],[0,0,-1],sphere,.001,1e30),null);
+const nonunit=api.hitSphere([0,0,0],[0,0,-2],sphere,.001,1e30);assert.equal(nonunit.t,1);assert.deepEqual(nonunit.p,h.p);
+assert.equal(api.nearest([0,0,0],[0,0,-1],[{...sphere,id:'far',p:[0,0,-6]},sphere]).s.id,'near');
+const n=[0,1,0],d=[Math.SQRT1_2,-Math.SQRT1_2,0],r=d.map((v,i)=>v-2*(d[1])*n[i]);assert.ok(Math.abs(r[1]-Math.SQRT1_2)<1e-12);assert.ok(Math.abs(Math.hypot(...r)-1)<1e-12);
+console.log('PASS: sphere roots / tangent / inside / miss / non-unit parameter / closest hit / mirror direction.');
+module.exports={V};

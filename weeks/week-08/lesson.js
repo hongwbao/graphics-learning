@@ -1,0 +1,35 @@
+'use strict';
+(() => {
+function sceneFragments(s){
+  const W=240,H=150,verts=[],tris=[];
+  const box=(cx,cy,cz,sz)=>{const base=verts.length;for(const p of [[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1],[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1]])verts.push([cx+p[0]*sz,cy+p[1]*sz,cz+p[2]*sz]);for(const face of [[0,1,2,3],[5,4,7,6],[1,5,6,2],[4,0,3,7],[3,2,6,7],[4,5,1,0]]){tris.push({ids:[face[0],face[1],face[2]].map(i=>base+i),uv:[[0,0],[1,0],[1,1]]});tris.push({ids:[face[0],face[2],face[3]].map(i=>base+i),uv:[[0,0],[1,1],[0,1]]});}};
+  box(-.6,0,-3.6,.65);box(.6,-.15,-4.8,.7);
+  const a=s.yaw*Math.PI/180,c=Math.cos(a),sn=Math.sin(a),f=1/Math.tan(s.fov*Math.PI/360);
+  const projected=verts.map(p=>{const x=p[0]-s.cameraX,z=p[2]-s.cameraZ,rx=c*x-sn*z,rz=sn*x+c*z,d=-rz;return {x:(f*rx/d/(W/H)*.5+.5)*W,y:(.5-f*p[1]/d*.5)*H,d};});
+  const fragments=[];
+  const ordered=s.order==='reverse'?[...tris].reverse():tris;
+  for(const t of ordered){const p=t.ids.map(i=>projected[i]);if(p.some(v=>v.d<.1))continue;const den=(p[1].y-p[2].y)*(p[0].x-p[2].x)+(p[2].x-p[1].x)*(p[0].y-p[2].y);if(Math.abs(den)<1e-8)continue;
+    for(let y=Math.max(0,Math.floor(Math.min(...p.map(v=>v.y))));y<=Math.min(H-1,Math.ceil(Math.max(...p.map(v=>v.y))));y++)for(let x=Math.max(0,Math.floor(Math.min(...p.map(v=>v.x))));x<=Math.min(W-1,Math.ceil(Math.max(...p.map(v=>v.x))));x++){const px=x+.5,py=y+.5,w0=((p[1].y-p[2].y)*(px-p[2].x)+(p[2].x-p[1].x)*(py-p[2].y))/den,w1=((p[2].y-p[0].y)*(px-p[2].x)+(p[0].x-p[2].x)*(py-p[2].y))/den,w2=1-w0-w1;if(Math.min(w0,w1,w2)<-1e-8)continue;const w=[w0,w1,w2],inv=w.reduce((sum,v,j)=>sum+v/p[j].d,0);const uv=[0,1].map(k=>w.reduce((sum,v,j)=>sum+v*t.uv[j][k]/p[j].d,0)/inv);fragments.push({i:y*W+x,z:1/inv,u:uv[0],v:uv[1]});}
+  }
+  return {...s,width:W,height:H,fragments};
+}
+window.Lesson={week:8,title:'中期实验：一张图的四个嫌疑人',subtitle:'位置、纹理还是遮挡？把前七周连成可诊断的系统。',intro:'重建网格投影位置正确，却出现扭曲纹理和错误遮挡。不要一次改三处代码：本周用两个带棋盘纹理的立方体，建立相机、插值、采样、深度之间的因果链。',time:'8–10 小时',goals:['画出每个参数进入管线的阶段，区分几何错误与外观错误。','解释透视正确插值和深度测试为什么处理不同问题。','完成单变量排查记录，给出至少一个能推翻初始假设的反例。'],sections:[
+{title:'先有参考，再谈“画错了”',html:'<p>截图像不像不是唯一标准。先固定相机、几何、纹理与绘制顺序，把一个正常场景作为参考。接着只改变一个因素：相机 X 改变轮廓位置；纹理频率改变表面明暗分布；深度设置改变重叠区域。若轮廓、纹理和遮挡一起变化，先检查是不是多个输入同时动了。</p><p>本周屏幕中的物体由真实三维顶点与三角形投影而来，但执行者是浏览器中的 CPU 软件光栅器，不是 WebGL GPU。这样能显式检查每个候选片段；不将运行速度当作实时 GPU 性能。</p>'},
+{title:'连接相机、投影与采样位置',html:'<div class="formula">x_ndc = f x_view / d / aspect<br>y_ndc = f y_view / d，d = −z_view &gt; 0</div><p>f = 1/tan(FOV/2)，FOV 是竖直视场角，aspect 是宽高比。相机先从世界位置得到观察坐标，投影才把不同深度映到二维。实验中的近裁剪限制为 d&gt;0.1；为了简化，碰到近面的整个三角形会被跳过，因此不要把极端相机位置的缺口当作正式裁剪结果。</p><p>OpenGL 中这部分通常来自 V、P 与透视除法。本实验保留相同的几何含义，直接算屏幕坐标，避免窗口和驱动代码遮住学习目标。</p>'},
+{title:'UV 不应该在透视图像里随便线性混合',html:'<div class="formula">u = [Σ λ_i u_i / d_i] / [Σ λ_i / d_i]</div><p>λ_i 是像素中心在屏幕三角形中的重心权重；u_i 是顶点纹理坐标，d_i 是该顶点到观察平面的正距离。v 同理。每个角点都落对，并不保证中间的 UV 正确；透视下要先按倒数深度加权，再除回权重和。</p><p>局部一张图案在斜面上被拉伸，可能是 UV、插值或采样错误；它不直接说明三维重建几何一定错了。</p>'},
+{title:'深度和绘制顺序是两套规则',html:'<p>本实验在每个像素保存最近候选的正距离 d。开启测试时，只保留更小的 d；关闭后，最后提交的候选覆盖前面的颜色。这里用 1/(Σ λ_i/d_i) 重建表面的观察距离，便于建立“近处更小”的直觉，不直接模拟 GPU 的非线性窗口深度。</p><p>交换绘制顺序：深度开启时应基本相同，关闭时可能翻转。同一立方体的背面也会产生候选，因此错误可能先出现在单个物体内部。边界采样不含完整 top-left 规则，少量共享边像素差异不应被误认作整体遮挡错误。</p>'}
+],lab:{title:'软件渲染诊断台：相机 × 棋盘 × 深度',description:'移动相机、改变棋盘频率、交换三角形顺序；每次先预测哪些位置应改变。核心代码真实处理投影后的候选片段，输入中每个 f 包含像素编号 i、距离 z 与透视插值后的 u/v。',controls:[{id:'cameraX',label:'相机 X',type:'range',min:-1.5,max:1.5,step:.1,value:0},{id:'cameraZ',label:'相机沿 Z 移动',type:'range',min:-.5,max:2,step:.1,value:0},{id:'yaw',label:'相机偏航角',type:'range',min:-15,max:15,step:1,value:0},{id:'fov',label:'竖直 FOV',type:'range',min:35,max:85,step:1,value:55},{id:'frequency',label:'棋盘格频率',type:'range',min:2,max:24,step:1,value:8},{id:'depth',label:'深度测试',type:'select',options:[{value:'on',label:'开启'},{value:'off',label:'关闭'}],value:'on'},{id:'order',label:'三角形提交顺序',type:'select',options:[{value:'normal',label:'原顺序'},{value:'reverse',label:'逆序'}],value:'normal'}],input:sceneFragments,code:`const n = input.width * input.height;
+const depth = new Array(n).fill(Infinity);
+const pixels = new Array(n).fill(0);
+let passed = 0;
+for (const f of input.fragments) {
+  if (input.depth === 'on' && f.z >= depth[f.i]) continue;
+  depth[f.i] = f.z;
+  const cell = (Math.floor(f.u * input.frequency)
+              + Math.floor(f.v * input.frequency)) & 1;
+  pixels[f.i] = cell ? 0.85 : 0.22;
+  passed++;
+}
+return {width:input.width,height:input.height,pixels,passed,
+        candidates:input.fragments.length};`,codeHelp:'先把深度条件注释掉，预测会错在哪里；再把频率从 input.frequency 改为固定值。pixels 的每项是线性灰度近似，本周不做完整颜色管理；不要把 passed 当作 GPU 实际执行次数。',paint(canvas,r){const c=LessonDraw.setup(canvas,'#102923');if(!r.pixels)throw Error('请返回 pixels 数组');const off=document.createElement('canvas');off.width=r.width;off.height=r.height;const cx=off.getContext('2d'),img=cx.createImageData(r.width,r.height);for(let i=0;i<r.pixels.length;i++){const v=r.pixels[i],j=i*4;img.data[j]=v?Math.round(v*145):16;img.data[j+1]=v?Math.round(v*220):41;img.data[j+2]=v?Math.round(v*190):35;img.data[j+3]=255;}cx.putImageData(img,0,0);c.imageSmoothingEnabled=false;c.drawImage(off,35,35,830,465);LessonDraw.text(c,'CPU 软件光栅：真实投影、UV 与逐像素遮挡',35,535,'#dce7df',18);},verify:r=>`候选 ${r.candidates} 个，写入 ${r.passed} 次。先根据轮廓、图案、重叠区域分别定位，而非只看整张图像是否“奇怪”。`,presets:[{label:'参考场景',values:{cameraX:0,cameraZ:0,yaw:0,fov:55,frequency:8,depth:'on',order:'normal'}},{label:'遮挡故障',values:{depth:'off',order:'reverse'}},{label:'高频纹理',values:{frequency:24,depth:'on'}}],takeaway:'相机、UV/采样与可见性可能独立出错；一个“能运行”的图像也需要可验证的参考。',limitation:'CPU 240×150 软件光栅，两个立方体、程序棋盘、无光照；近面相交整三角跳过，无 GPU 性能结论、mipmap 或完整裁剪。'},tasks:[{title:'排查一张错误图，不同时改三个变量',prompt:'先载入参考，再关闭深度并逆序提交。预测轮廓、UV 与遮挡分别是否改变。恢复一个变量后记录证据，提出能区分“投影错误”和“遮挡错误”的操作。',hint:'若只交换顺序就改变重叠结果，优先验证深度状态；改变材质颜色不会修复错位轮廓。'},{title:'把核心循环翻译成 OpenGL 数据流',prompt:'说明 input.fragments、depth、pixels 分别对应哪些 GPU 管线概念。写出软件循环与真实 GPU 并行执行的两项差别，避免把这里的计数当作硬件统计。',hint:'关注候选片段、深度缓冲、颜色缓冲；GPU 可提前深度测试。'}],quiz:[{question:'相机不动，只改棋盘频率，最应该保持什么？',options:['物体的投影轮廓','所有像素颜色','CPU 运行时间必然相同'],answer:0,explanation:'纹理频率改变表面采样结果，不改变提交的几何位置；运行时间和颜色不必相同。'},{question:'深度测试关闭时，远物体一定显示在后面吗？',options:['一定','取决于绘制顺序','只取决于基础色'],answer:1,explanation:'候选颜色直接覆盖会让后提交者占据重叠位置。'},{question:'屏幕重心权重直接插值 UV，在透视投影下通常怎样？',options:['总是精确','一般需要倒数深度加权校正','应完全禁止 UV 插值'],answer:1,explanation:'透视下需要 Σλu/d 除以 Σλ/d；正交或等深度等特殊情况可退化为线性插值。'},{question:'这页写入候选计数能说明实际 GPU 执行次数吗？',options:['能，CPU 和 GPU 完全一样','不能，只描述本软件算法','只要分辨率一样就能'],answer:1,explanation:'硬件执行可能有并行、早期深度及优化；CPU 模型不能替代 GPU 测量。'},{question:'轮廓位置正确而棋盘变形，第一步应是？',options:['必然重建失败','拆分 UV、插值、采样假设并逐项验证','盲目移动相机'],answer:1,explanation:'观察现象只支持假设；应控制变量并找能够证伪的实验。'}],misconceptions:['把投影、插值、采样和可见性混成一个“渲染问题”；应分开验证。','软件片段计数不是 GPU profiler，运行速度也不是 GPU 帧时间。','角点 UV 对了不代表中间的透视插值正确。'],next:'若能画出每个变量影响的阶段，进入第 9 周，拆开法线、光源和观察方向。',sources:[{title:'LearnOpenGL · Coordinate Systems',url:'https://learnopengl.com/Getting-started/Coordinate-Systems',why:'模型、观察、投影与透视除法。'},{title:'LearnOpenGL · Depth testing',url:'https://learnopengl.com/Advanced-OpenGL/Depth-testing',why:'深度测试、缓冲与可见性。'}]};
+})();
